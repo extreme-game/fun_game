@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<audio hidden id="jumpsound">
+  <source src="jump.mp3" type="audio/mp3">
+</audio>
+<body onkeydown="if (player.inair == false) { player.y_a=-10; 
+				jump.pause();
+                jump.currentTime = 0;
+                jump.play(); }">
+				<img hidden id="tree" width="50" height="50" src="tree.jpeg">
+<img hidden id="star" width="50" height="50" src="star.jpeg"><img hidden id="cloud" width="100" height="50" src="cloud.jpeg"><canvas id="gamearea" width="900" height="600" style="border: 2px solid"></canvas>
+<script>
+var rotateamount = 0;
+var treeimg = document.getElementById("tree");
+var jump = document.getElementById("jumpsound");
+var randomgeen = 258;
+var img = document.getElementById("star");
+var cloudimg = document.getElementById("cloud");
+var play = true;
+var canvas = document.getElementById("gamearea");
+var ctx = canvas.getContext("2d");
+var cloud = {
+x: [500],
+y: [410],
+type: [treeimg],
+width: [100],
+height: [200]
+};
+for (i=0; i<10; i++) {
+	cloud.x.push(500*i+(randomgen()*500));
+	cloud.y.push(randomgen()*200);
+	cloud.type.push(cloudimg);
+	cloud.width.push(200);
+	cloud.height.push(100);
+}
+var player = {
+	x: 0,
+	y: 590,
+	x_a : 5,
+	y_a : 0,
+	inair: true 
+};
+var gravity = .3;
+	var plat = {
+	x: [500, 600, 4000, 4050],
+	y: [550, 550, 550, 500]
+};
+var obst = {
+	x: [1000, 1100, 1500, 1600],
+	y: [550, 550, 550, 550],
+	movex: [0, 0, 0, 0]
+};
+var cannons = {
+	x: [4000, 4050],
+	y: [550, 500]
+};
+iterize();
+function iterize() {
+	if (player.x % 2000 == 0) {
+		// shoot
+		for (i=0; i<cannons.x.length; i++) {
+			obst.x.push(cannons.x[i]);
+			obst.y.push(cannons.y[i]);
+			obst.movex.push(-2);
+		}
+	}
+	if (play == true) {
+		setTimeout(iterize, 10);
+	}
+	//player.x_a += .03;
+	player.y_a += gravity;
+	player.y += player.y_a;
+	player.x += player.x_a;
+	player.inair = true;
+	loadgraphics();
+	if (player.y > 550) {
+		player.y = 550;
+		player.y_a = 0;
+		player.inair = false;
+	}
+	if (player.inair == true) {
+		rotateamount += .025; 
+	} else {
+	rotateamount = 0;
+	}
+}
+function loadgraphics() {
+	ctx.fillStyle = "lightblue";
+	ctx.fillRect(0, 0, 900, 600);
+	for (i=0; i<cloud.x.length; i++) {
+		ctx.drawImage(cloud.type[i], cloud.x[i] - player.x + 450, cloud.y[i], cloud.width[i], cloud.height[i]);
+	}
+	//rotate player
+	ctx.save();
+	ctx.translate(450, player.y);
+	//ctx.rotate(rotateamount);
+	ctx.translate(-475, -player.y);
+	//plot player
+	ctx.fillStyle = "blue";
+	ctx.fillRect(450, player.y, 50, 50);
+	ctx.restore();
+	ctx.fillStyle = "tan";
+	for (i=0; i<plat.x.length; i++) {
+		ctx.fillRect(plat.x[i] - player.x + 450, plat.y[i], 50, 50); 
+		//detect collision
+		if (player.x < plat.x[i] + 50 && player.x > plat.x[i] - 50 && player.y < plat.y[i] + 50 && player.y > plat.y[i] - 50) {
+			player.y = plat.y[i] - 50;
+			player.y_a = 0;
+			player.inair = false;
+		}
+	}
+	ctx.fillStyle = "red";
+	for (i=0; i<obst.x.length; i++) {
+		obst.x[i] += obst.movex[i];
+		//ctx.fillRect(obst.x[i] - player.x + 450, obst.y[i], 50, 50); 
+		ctx.drawImage(img, obst.x[i] - player.x + 430, obst.y[i], 50, 50);
+		//detect collision
+		if (player.x < obst.x[i] + 50 && player.x > obst.x[i] - 50 && player.y < obst.y[i] + 50 && player.y > obst.y[i] - 50) {
+			play = false;
+		}
+	}
+	ctx.fillStyle = "black";
+	for (i=0; i<cannons.x.length; i++) {
+		ctx.fillRect(cannons.x[i] - player.x + 450, cannons.y[i], 50, 50);
+	}
+}
+
+function randomgen() {
+	randomgeen *= 2.71382;
+	return randomgeen % 1;
+}
+</script>
+</body>
+</html>
